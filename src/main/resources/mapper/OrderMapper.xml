@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.OrderDAO">
+    <select id="listOrders" resultMap="getOrderAndUserAndOrderItemAndProduct">
+        SELECT o.id oid, o.orderCode oorderCode, o.createDate ocreateDate, o.payDate opayDate, o.deliveryDate odeliveryDate, o.confirmDate oconfirmDate, o.status ostatus, u.name uname, p.name pname, p.promotePrice ppromotePrice, p.id pid, oi.number oinumber FROM order_ o LEFT JOIN orderitem oi ON o.id = oi.oid LEFT JOIN user u on oi.uid = u.id LEFT JOIN product p ON oi.pid = p.id ORDER BY o.id ASC
+    </select>
+    
+    <select id="listOrderIds" resultType="Integer">
+        SELECT id FROM order_ ORDER BY id ASC
+    </select>
+    
+    <select id="getOrderById" resultMap="getOrderAndUserAndOrderItemAndProduct" parameterType="int">
+        SELECT o.id oid, o.post opost, o.orderCode oorderCode, o.address oaddress, o.receiver oreceiver, o.mobile omobile, o.createDate ocreateDate, o.payDate opayDate, o.deliveryDate odeliveryDate, o.confirmDate oconfirmDate, o.status ostatus, u.name uname, oi.id oiid, oi.number oinumber, p.name pname, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.id pid FROM order_ o LEFT JOIN orderitem oi ON o.id = oi.oid LEFT JOIN user u on oi.uid = u.id LEFT JOIN product p ON oi.pid = p.id WHERE o.id = #{id}
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.Order" id="getOrderAndUserAndOrderItemAndProduct">
+        <id column="oid" property="id"/>
+        <result column="ocreateDate" property="createDate"/>
+        <result column="opayDate" property="payDate"/>
+        <result column="odeliveryDate" property="deliveryDate"/>
+        <result column="oconfirmDate" property="confirmDate"/>
+        <result column="ostatus" property="status"/>
+        <result column="oaddress" property="address"/>
+        <result column="oreceiver" property="receiver"/>
+        <result column="omobile" property="mobile"/>
+        <result column="oorderCode" property="orderCode"/>
+        <result column="opost" property="post"/>
+        <association property="user" javaType="com.loststars.tmallboot.pojo.User">
+            <result column="uname" property="name"/>
+        </association>
+        <collection property="orderItems" ofType="com.loststars.tmallboot.pojo.OrderItem">
+            <id column="oiid" property="id"/>
+            <result column="oinumber" property="number"/>
+            <association property="product" javaType="com.loststars.tmallboot.pojo.Product">
+                <id column="pid" property="id"/>
+                <result column="pname" property="name"/>
+                <result column="poriginalPrice" property="originalPrice"/>
+                <result column="ppromotePrice" property="promotePrice"/>
+            </association>
+        </collection>
+    </resultMap>
+    
+    <select id="listBoughtOrdersByUserId" resultMap="getOrderAndUserAndOrderItemAndProduct" parameterType="int">
+        SELECT o.id oid, o.orderCode oorderCode, o.address oaddress, o.receiver oreceiver, o.mobile omobile, o.createDate ocreateDate, o.payDate opayDate, o.deliveryDate odeliveryDate, o.confirmDate oconfirmDate, o.status ostatus, u.name uname, p.name pname, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.id pid, oi.number oinumber FROM order_ o LEFT JOIN orderitem oi ON o.id = oi.oid LEFT JOIN user u on oi.uid = u.id LEFT JOIN product p ON oi.pid = p.id WHERE o.uid = #{userId} AND o.status != 'delete' ORDER BY o.createDate DESC
+    </select>
+    
+    <update id="updateDeliveryOrder" parameterType="com.loststars.tmallboot.pojo.Order">
+        UPDATE order_ SET status = #{status}, deliveryDate = #{deliveryDate} WHERE id = #{id}
+    </update>
+    
+    <insert id="addOrder" parameterType="com.loststars.tmallboot.pojo.Order" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO order_ (orderCode, address, post, receiver, mobile, userMessage, createDate, uid, status) VALUES (#{orderCode}, #{address}, #{post}, #{receiver}, #{mobile}, #{userMessage}, #{createDate}, #{user.id}, #{status})
+    </insert>
+    
+    <update id="updatePayedOrder" parameterType="com.loststars.tmallboot.pojo.Order">
+        UPDATE order_ SET status = #{status}, payDate = #{payDate} WHERE id = #{id} AND status = 'waitPay'
+    </update>
+    
+    <update id="updateConfirmedOrder" parameterType="com.loststars.tmallboot.pojo.Order">
+        UPDATE order_ SET status = #{status}, confirmDate = #{confirmDate} WHERE id = #{id} AND status = 'waitConfirm'
+    </update>
+    
+    <delete id="deleteOrder" parameterType="com.loststars.tmallboot.pojo.Order">
+        UPDATE order_ SET status = #{status} WHERE id = #{id}
+    </delete>
+    
+    <update id="updateReviewOrder" parameterType="com.loststars.tmallboot.pojo.Order">
+        UPDATE order_ SET status = #{status} WHERE id = #{id} AND status = 'waitReview'
+    </update>
+</mapper>

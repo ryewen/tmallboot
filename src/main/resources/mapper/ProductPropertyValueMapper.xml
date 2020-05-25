@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.ProductPropertyValueDAO">
+    <select id="listProductPropertyValuesByProductId" resultMap="getProductPropertyValueAndProperty" parameterType="int">
+        SELECT pv.id pvid, pv.value pvvalue, pt.name ptname FROM propertyvalue pv LEFT JOIN property pt ON pv.ptid = pt.id WHERE pv.pid = #{productId}
+    </select>
+     
+    <resultMap type="com.loststars.tmallboot.pojo.ProductPropertyValue" id="getProductPropertyValueAndProperty">
+        <id column="pvid" property="id"/>
+        <result column="pvvalue" property="value"/>
+        <association property="property" javaType="com.loststars.tmallboot.pojo.Property">
+            <result column="ptname" property="name"/>
+        </association>
+    </resultMap>
+    
+    <select id="getProductPropertyValueByProductIdAndPropertyId" resultType="com.loststars.tmallboot.pojo.ProductPropertyValue">
+        SELECT value FROM propertyvalue WHERE pid = #{productId} AND ptid = #{propertyId}
+    </select>
+    
+    <insert id="addProductPropertyValue" parameterType="com.loststars.tmallboot.pojo.ProductPropertyValue">
+        INSERT INTO propertyvalue (pid, ptid, value) VALUES (#{product.id}, #{property.id}, #{value})
+    </insert>
+    
+    <update id="updateProductPropertyValue" parameterType="com.loststars.tmallboot.pojo.ProductPropertyValue">
+        UPDATE propertyvalue SET value = #{value} WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteProductPropertyValueByPropertyId" parameterType="int">
+        DELETE FROM propertyvalue pv WHERE pv.ptid = #{propertyId}
+    </delete>
+</mapper>

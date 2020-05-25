@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.UserDAO">
+    <select id="listUsers" resultType="com.loststars.tmallboot.pojo.User">
+        SELECT id, name, password FROM user
+    </select>
+    
+    <select id="getUserByName" resultMap="userAndRole" parameterType="String">
+        SELECT u.id uid, u.name uname, u.password upassword, u.salt usalt, r.name rname FROM user u LEFT JOIN userrole ur ON u.id = ur.uid LEFT JOIN role r ON ur.rid = r.id WHERE u.name = #{name}
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.User" id="userAndRole">
+        <id column="uid" property="id" />
+        <result column="uname" property="name" />
+        <result column="upassword" property="password" />
+        <result column="usalt" property="salt" />
+        <collection property="roles" ofType="com.loststars.tmallboot.pojo.Role">
+            <result column="rname" property="name" />
+        </collection>
+    </resultMap>
+    
+    <insert id="addUser" parameterType="com.loststars.tmallboot.pojo.User" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO user (name, password, salt) VALUES (#{name}, #{password}, #{salt})
+    </insert>
+</mapper>

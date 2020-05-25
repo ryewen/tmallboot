@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.ProductImageDAO">
+    <select id="listProductImagesByProductIdAndType" resultMap="getProductImageAndProduct">
+        SELECT pi.id piid, p.id pid, pi.type ptype FROM productimage pi LEFT JOIN product p ON pi.pid = p.id WHERE pi.pid = #{productId} AND pi.type = #{type} ORDER BY pi.id DESC
+    </select>
+     
+    <resultMap type="com.loststars.tmallboot.pojo.ProductImage" id="getProductImageAndProduct">
+        <id column="piid" property="id"/>
+        <result column="ptype" property="type"/>
+        <association property="product" javaType="com.loststars.tmallboot.pojo.Product">
+            <id column="pid" property="id"/>
+        </association>
+    </resultMap>
+     
+    <insert id="addProductImage" parameterType="com.loststars.tmallboot.pojo.ProductImage" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO productimage (pid, type) VALUES (#{product.id}, #{type})
+    </insert>
+     
+    <delete id="deleteProductImage" parameterType="int">
+        DELETE FROM productimage WHERE id=#{id};
+    </delete>
+</mapper>

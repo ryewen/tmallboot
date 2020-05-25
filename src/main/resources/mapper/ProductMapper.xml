@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.ProductDAO">
+    <select id="listProductByCategoryId" parameterType="int" resultMap="getProductAndCategory">
+        SELECT p.id pid, p.name pname, p.subTitle psubTitle, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.stock pstock, c.id cid, c.name cname FROM product p LEFT JOIN category c ON p.cid = c.id WHERE p.cid = #{categoryId}
+    </select>
+     
+    <resultMap type="com.loststars.tmallboot.pojo.Product" id="getProductAndCategory">
+        <id column="pid" property="id"/>
+        <result column="pname" property="name"/>
+        <result column="psubTitle" property="subTitle"/>
+        <result column="poriginalPrice" property="originalPrice"/>
+        <result column="ppromotePrice" property="promotePrice"/>
+        <result column="pstock" property="stock"/>
+        <association property="category" javaType="com.loststars.tmallboot.pojo.Category">
+            <id column="cid" property="id"/>
+            <result column="cname" property="name"/>
+        </association>
+     </resultMap>
+     
+    <insert id="addProduct" parameterType="com.loststars.tmallboot.pojo.Product"> 
+        INSERT INTO product (name, subTitle, originalPrice, promotePrice, stock, cid) VALUES (#{name}, #{subTitle}, #{originalPrice}, #{promotePrice}, #{stock}, #{category.id})
+     </insert>
+     
+    <select id="getProductById" parameterType="int" resultMap="getProductAndCategory">
+        SELECT p.id pid, p.name pname, p.subTitle psubTitle, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.stock pstock, c.id cid, c.name cname FROM product p LEFT JOIN category c ON p.cid = c.id WHERE p.id = #{id}
+    </select>
+     
+    <update id="updateProduct" parameterType="com.loststars.tmallboot.pojo.Product">
+        UPDATE product SET name = #{name}, subTitle = #{subTitle}, originalPrice = #{originalPrice}, name = #{name}, promotePrice = #{promotePrice}, stock = #{stock} WHERE id = #{id}
+    </update>
+     
+    <delete id="deleteProduct" parameterType="int">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
+    
+    <select id="listProductsByKeyWord" parameterType="String" resultType="com.loststars.tmallboot.pojo.Product">
+        SELECT id, name, promotePrice FROM product WHERE name LIKE CONCAT('%', #{keyWord}, '%')
+    </select>
+    
+    <update id="updateStock">
+        UPDATE product SET stock = stock - #{count} WHERE id = #{id} AND stock >= #{count}
+    </update>
+    
+    <select id="listAllProducts" resultType="com.loststars.tmallboot.pojo.Product">
+        SELECT id, name, promotePrice FROM product
+    </select>
+</mapper>

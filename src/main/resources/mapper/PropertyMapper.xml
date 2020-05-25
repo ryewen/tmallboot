@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.PropertyDAO">
+    <select id="getPropertiesByCategoryId" parameterType="int" resultMap="getProperty">
+        SELECT p.id pid, p.name pname, c.id cid, c.name cname FROM property p LEFT JOIN category c ON p.cid = c.id WHERE c.id = #{categoryId}
+    </select>
+     
+    <resultMap id="getProperty" type="com.loststars.tmallboot.pojo.Property">
+        <id column="pid" property="id"/>
+        <result column="pname" property="name"/>
+        <association property="category" javaType="com.loststars.tmallboot.pojo.Category">
+            <id column="cid" property="id"/>
+            <result column="cname" property="name"/>
+        </association>
+    </resultMap>
+     
+    <insert id="addProperty" parameterType="com.loststars.tmallboot.pojo.Property">
+        INSERT INTO property (name, cid) VALUES (#{name}, #{category.id})
+    </insert>
+     
+    <select id="getPropertyById" parameterType="int" resultMap="getProperty">
+        SELECT p.id pid, p.name pname, c.id cid, c.name cname FROM property p LEFT JOIN category c ON p.cid = c.id WHERE p.id = #{id}
+    </select>
+     
+    <update id="updateProperty" parameterType="com.loststars.tmallboot.pojo.Property">
+        UPDATE property SET name=#{name} WHERE id=#{id}
+    </update>
+     
+    <delete id="deleteProperty" parameterType="int">
+        DELETE FROM property WHERE id=#{id}
+    </delete>
+    
+    <select id="listPropertiesByProductId" parameterType="int" resultType="com.loststars.tmallboot.pojo.Property">
+        SELECT pt.id id, pt.name name FROM property pt LEFT JOIN category c ON pt.cid = c.id LEFT JOIN product p ON p.cid = c.id WHERE p.id = #{productId}
+    </select>
+</mapper>

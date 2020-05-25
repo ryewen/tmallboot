@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.CategoryDAO">
+    <select id="listCategory" resultMap="getCategoryAndImage">
+        SELECT c.id cid, c.name cname, ci.id ciid FROM category c LEFT JOIN categoryimage ci ON c.id = ci.cid
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.Category" id="getCategoryAndImage">
+		<id column="cid" property="id"/>
+		<result column="cname" property="name"/>
+		<association property="categoryImage" javaType="com.loststars.tmallboot.pojo.CategoryImage">
+			<id column="ciid" property="id"/>
+        </association>
+    </resultMap>
+	 
+    <insert id="addCategory" parameterType="com.loststars.tmallboot.pojo.Category" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO category (name) VALUES (#{name})
+    </insert>
+	 
+    <delete id="deleteCategoryById" parameterType="int">
+        DELETE FROM category WHERE id=#{id}
+    </delete>
+	 
+    <select id="getCategoryById" parameterType="int" resultMap="getCategoryAndImage">
+        SELECT c.id cid, c.name cname, ci.id ciid FROM category c LEFT JOIN categoryimage ci ON c.id = ci.cid WHERE c.id=#{id}
+    </select>
+	 
+    <update id="updateCategory" parameterType="com.loststars.tmallboot.pojo.Category">
+        UPDATE category SET name=#{name} WHERE id=#{id}
+    </update>
+    
+    <select id="listCategoryWithProduct" resultMap="getCategoryWithProduct">
+        SELECT c.id cid, c.name cname, p.id pid, p.name pname, p.subTitle psubTitle, p.promotePrice ppromotePrice, p.createDate pcreateDate, ci.id ciid FROM category c LEFT JOIN product p ON c.id = p.cid LEFT JOIN categoryimage ci ON c.id = ci.cid
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.Category" id="getCategoryWithProduct">
+        <id column="cid" property="id"/>
+        <result column="cname" property="name"/>
+        <association property="categoryImage" javaType="com.loststars.tmallboot.pojo.CategoryImage">
+            <id column="ciid" property="id"/>
+        </association>
+        <collection property="products" ofType="com.loststars.tmallboot.pojo.Product">
+            <id column="pid" property="id"/>
+            <result column="pname" property="name"/>
+            <result column="psubTitle" property="subTitle"/>
+            <result column="ppromotePrice" property="promotePrice"/>
+            <result column="pcreateDate" property="createDate"/>
+        </collection>
+    </resultMap>
+    
+    <select id="getCategoryAndProductsById" resultMap="getCategoryWithProduct" parameterType="int">
+        SELECT c.id cid, c.name cname, p.id pid, p.name pname, p.subTitle psubTitle, p.promotePrice ppromotePrice, p.createDate pcreateDate, ci.id ciid FROM category c LEFT JOIN product p ON c.id = p.cid LEFT JOIN categoryimage ci ON c.id = ci.cid WHERE c.id = #{id}
+    </select>
+</mapper>

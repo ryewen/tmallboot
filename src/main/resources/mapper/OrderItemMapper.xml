@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.OrderItemDAO">
+    <select id="listOrderItemsByProductId" parameterType="int" resultType="com.loststars.tmallboot.pojo.OrderItem">
+        SELECT number FROM orderitem WHERE pid = #{productId}
+    </select>
+    
+    <select id="getOrderItemInCartByUserIdAndProductId" resultType="com.loststars.tmallboot.pojo.OrderItem">
+        SELECT id, number FROM orderitem WHERE uid = #{userId} AND pid = #{productId} AND oid IS NULL
+    </select>
+    
+    <insert id="addOrderItem" parameterType="com.loststars.tmallboot.pojo.OrderItem" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO orderitem (pid, uid, number) VALUES (#{product.id}, #{user.id}, #{number})
+    </insert>
+    
+    <update id="updateOrderItem" parameterType="com.loststars.tmallboot.pojo.OrderItem">
+        UPDATE orderitem SET number = #{number} WHERE id = #{id}
+    </update>
+    
+    <select id="getOrderItemInCartByIdAndUserId" resultMap="getOrderItemAndProduct">
+        SELECT oi.id oiid, oi.number oinumber, p.id pid, p.name pname, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.stock pstock FROM orderitem oi LEFT JOIN product p ON oi.pid = p.id WHERE oi.id = #{id} AND oi.oid IS NULL AND oi.uid = #{userId}
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.OrderItem" id="getOrderItemAndProduct">
+        <id column="oiid" property="id"/>
+        <result column="oinumber" property="number"/>
+        <association property="product" javaType="com.loststars.tmallboot.pojo.Product">
+            <id column="pid" property="id"/>
+            <result column="pname" property="name"/>
+            <result column="poriginalPrice" property="originalPrice"/>
+            <result column="ppromotePrice" property="promotePrice"/>
+            <result column="pstock" property="stock"/>
+        </association>
+    </resultMap>
+    
+    <select id="listOrderItemsInCartByUserId" parameterType="int" resultMap="getOrderItemAndProduct">
+        SELECT oi.id oiid, oi.number oinumber, p.id pid, p.name pname, p.originalPrice poriginalPrice, p.promotePrice ppromotePrice, p.stock pstock FROM orderitem oi LEFT JOIN product p ON oi.pid = p.id WHERE oi.uid = #{userId} AND oi.oid IS NULL
+    </select>
+    
+    <select id="getProductCountInCartByUserId" parameterType="int" resultType="int">
+        SELECT IFNULL((SELECT SUM(number) FROM orderitem WHERE uid = #{userId} AND oid IS NULL GROUP BY uid), 0)
+    </select>
+    
+    <update id="updateOrderItemNumber" parameterType="com.loststars.tmallboot.pojo.OrderItem">
+        UPDATE orderitem SET number = #{number} WHERE uid = #{user.id} AND pid = #{product.id} AND oid IS NULL
+    </update>
+    
+    <select id="listOrderItemsInCartByIdsLock" resultMap="getOrderItemAndProductAndUser">
+        SELECT oi.id oiid, oi.uid oiuid, oi.number oinumber, p.id pid, p.promotePrice ppromotePrice, p.stock pstock FROM orderitem oi LEFT JOIN product p ON oi.pid = p.id 
+        WHERE oi.id IN 
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach> 
+        AND oi.oid IS NULL LOCK IN SHARE MODE
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.OrderItem" id="getOrderItemAndProductAndUser">
+        <id column="oiid" property="id"/>
+        <result column="oinumber" property="number"/>
+        <association property="user" javaType="com.loststars.tmallboot.pojo.User">
+            <id column="oiuid" property="id"/>
+        </association>
+        <association property="product" javaType="com.loststars.tmallboot.pojo.Product">
+            <id column="pid" property="id"/>
+            <result column="ppromotePrice" property="promotePrice"/>
+            <result column="pstock" property="stock"/>
+        </association>
+    </resultMap>
+    
+    <update id="updateOrderItemOrderId" parameterType="com.loststars.tmallboot.pojo.OrderItem">
+        UPDATE orderitem SET oid = #{order.id} WHERE id = #{id} AND oid IS NULL
+    </update>
+    
+    <delete id="deleteOrderItemInCart" parameterType="int">
+        DELETE FROM orderitem WHERE id = #{id} AND oid IS NULL
+    </delete>
+</mapper>

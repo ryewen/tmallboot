@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loststars.tmallboot.dao.ReviewDAO">
+    <select id="listReviewsByProductId" parameterType="int" resultMap="getReviewAndUser">
+        SELECT r.id rid, r.content rcontent, r.createDate rcreateDate, u.name uname FROM review r LEFT JOIN user u ON r.uid = u.id WHERE r.pid = #{productId}
+    </select>
+    
+    <resultMap type="com.loststars.tmallboot.pojo.Review" id="getReviewAndUser">
+        <id column="rid" property="id"/>
+        <result column="rcontent" property="content"/>
+        <result column="rcreateDate" property="createDate"/>
+        <association property="user" javaType="com.loststars.tmallboot.pojo.User">
+            <result column="uname" property="name"/>
+        </association>
+    </resultMap>
+    
+    <insert id="addReview" parameterType="com.loststars.tmallboot.pojo.Review">
+        INSERT INTO review (content, uid, pid, createDate) VALUES (#{content}, #{user.id}, #{product.id}, #{createDate})
+    </insert>
+</mapper>
